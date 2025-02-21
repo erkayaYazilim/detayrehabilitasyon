@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DETAY</title>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <!-- Ana CSS dosyalarınız -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+    <!-- Favicon vb. -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="img/detay.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="img/detay.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="img/detay.png"
+    />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Firebase (compat sürümü) -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-storage-compat.js"></script>
+
+    <!-- Modal Stil Ayarları -->
+    <style>
+      /* Modal pencere stili */
+      #galleryModal {
+        display: none; /* Başlangıçta gizli */
+        position: fixed;
+        z-index: 9999; /* Diğer içeriklerin üstünde */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: rgba(0, 0, 0, 0.9);
+      }
+      /* Kapat (X) butonu */
+      #closeModal {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: #fff;
+        font-size: 40px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      #closeModal:hover {
+        color: #fc036b;
+      }
+      /* Modal içindeki büyük resim */
+      #modalImg {
+        margin: auto;
+        display: block;
+        max-width: 90%;
+        max-height: 80%;
+        object-fit: contain;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      /* Modal okları */
+      .modal-arrow {
+        color: white;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 60px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0 20px;
+        user-select: none;
+      }
+      .modal-arrow:hover {
+        color: #fc036b;
+      }
+      #prevBtn {
+        left: 10px;
+      }
+      #nextBtn {
+        right: 10px;
+      }
+    </style>
+
+<style>
+  /* Video Modal */
+  #videoModal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+  }
+  #videoModal .close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #videoModal .close:hover {
+    color: #fc036b;
+  }
+  #videoModal video {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 80%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .modal-arrow {
+    color: white;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 60px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 20px;
+    user-select: none;
+  }
+  .modal-arrow:hover {
+    color: #fc036b;
+  }
+  #prevVideoBtn {
+    left: 10px;
+  }
+  #nextVideoBtn {
+    right: 10px;
+  }
+  /* Video Gallery */
+  .video-gallery-container {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 1rem 0;
+  }
+  .video-gallery {
+    display: inline-flex;
+    gap: 1rem;
+  }
+  .video-card {
+    flex: 0 0 23%;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .video-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 5px 15px rgba(255,255,255,0.3);
+  }
+  .video-card video {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-bottom: 0.5rem;
+  }
+  .video-card h2 {
+    font-family: var(--ff-montserrat);
+    font-size: 1.2rem;
+    color: #fc036b;
+    margin: 0.5rem 0;
+  }
+  .video-card p {
+    font-family: var(--ff-roboto);
+    font-size: var(--fs-paragraphs);
+    color: #ccc;
+    margin: 0;
+  }
+</style>
+  </head>
+  <body onload='if (window.location.href.substr(window.location.href.length - 6) == "#about") { introAboutLogoTransition(); }'>
+    <!-- Navbar -->
+    <nav class="navbar glass" style="height: 70px">
+      <span>
+        <a href="#home" style="display: flex; align-items: center">
+          <img class="img2" src="./img/detay.png" width="40" style="margin: -25px -10px -25px -20px" alt="Logo" />
+          <h1 class="logo">&nbsp;DETAY</h1>
+        </a>
+      </span>
+      <ul class="nav-links">
+        <li><a href="#home" id="pri" class="active cir_border">Ana Sayfa</a></li>
+        <li><a href="#services" id="sec" class="cir_border">Hizmetler</a></li>
+        <li><a href="#journey" id="tri" class="cir_border">İyileşme Yolculuğu</a></li>
+        <li><a href="#programs" id="quad" class="cir_border">Programlar</a></li>
+        <li><a href="#about" id="quint" class="cir_border">Kolajlar</a></li>
+        <li><a href="#vision-mission" id="quint" class="cir_border">Hakkımızda</a></li>
+        <li><a href="#contact" id="hept" class="cir_border">İletişim</a></li>
+        <li>
+          <div>
+            <input type="checkbox" class="checkbox dark" id="checkbox" />
+            <label for="checkbox" class="label">
+              <i class="fa fa-moon-o"></i>
+              <i class="fa fa-sun-o"></i>
+              <div class="ball"></div>
+            </label>
+          </div>
+        </li>
+      </ul>
+      <img src="./img/menu-btn.png" alt="Menü" class="menu-btn" />
+    </nav>
+    <!-- End Navbar -->
+
+    <!-- Header -->
+    <header id="home">
+      <div class="header-content">
+        <!-- Logo Ekleme: Header içeriğinin hemen üstünde -->
+        <img class="header-logo" src="./img/detaylogo.png" alt="Logo" />
+        <h2 id="quote">DETAY EĞİTİM VE REHABİLİTASYON MERKEZİ</h2>
+        <div class="line"></div>
+        <h1>Birlikte Daha Güçlüyüz.</h1>
+      </div>
+    </header>
+    
+    <!-- End Header -->
+
+    <!-- Hizmetler (Services) -->
+    <section class="events" id="services">
+      <div class="container">
+        <div class="title">
+          <h1 class="dark">Hizmetlerimiz</h1>
+          <div class="line"></div>
+        </div>
+        <div class="row">
+          <article class="card col">
+            <img class="card-img" src="./img/ozelogrenme.png" alt="Özel Öğrenme Güçlüğü" />
+            <h4 class="dark">Özel Öğrenme Güçlüğü</h4>
+            <p class="font-color">
+              Çocuklarınızın öğrenme süreçlerini desteklemek için bireyselleştirilmiş eğitim programları sunuyoruz.
+            </p>
+          </article>
+          <article class="card col">
+            <img src="./img/otizmdestek.png" alt="Otizm Destek Programı" />
+            <h4 class="dark">Otizm Destek Programı</h4>
+            <p class="font-color">
+              Otizm spektrum bozukluğu yaşayan bireyler için özel terapi ve eğitim hizmetleri sağlıyoruz.
+            </p>
+          </article>
+          <article class="card col">
+            <img src="./img/fiziktedavi.png" alt="Fizik Tedavi" />
+            <h4 class="dark">Fizik Tedavi</h4>
+            <p class="font-color">
+              Modern tekniklerle uygulanan fizik tedavi seanslarımız, hareket kabiliyetinizi artırmaya yöneliktir.
+            </p>
+          </article>
+          <article class="card col">
+            <img src="./img/isitmebozuklugu.png" alt="İşitme Bozuklukları" />
+            <h4 class="dark">İşitme Bozuklukları</h4>
+            <p class="font-color">
+              Uzman kadromuz, işitme bozuklukları konusunda kişiye özel çözümler sunarak yaşam kalitenizi artırır.
+            </p>
+          </article>
+          <article class="card col">
+            <img src="./img/zihinselengelli.png" alt="Zihinsel Engelli Eğitim" />
+            <h4 class="dark">Zihinsel Engelli Eğitim</h4>
+            <p class="font-color">
+              Zihinsel engelli bireyler için geliştirilmiş eğitim programlarımızla, bağımsız yaşam becerilerini destekliyoruz.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+    <!-- End Hizmetler -->
+
+    <!-- İyileşme Yolculuğu (Journey) -->
+    <section class="explore" id="journey">
+      <div class="explore-content">
+        <h1>İyileşme Yolculuğu</h1>
+        <div class="line"></div>
+        <p>
+          “En büyük zafer, bir daha düşmemekte değil, her düştüğünde ayağa kalkabilmektir.” – Konfüçyüs
+          <br />
+          Her düşüşten sonra yeniden ayağa kalkmanız için yanınızdayız; çünkü iyileşme yolculuğunuzda en güçlü destekçiniziz! 🌱💙
+        </p>
+      </div>
+    </section>
+    <!-- End İyileşme Yolculuğu -->
+
+    <!-- Programlar (Programs) -->
+    <section class="tours" id="programs">
+      <div class="container">
+        <div class="title">
+          <h1 class="font-color">Programlarımız</h1>
+          <div class="line"></div>
+        </div>
+        <div class="video-gallery-container">
+          <div class="video-gallery" id="videoGallery">
+            <!-- Firebase'den çekilen video kartları burada yüklenecek -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Video Modal -->
+    <div id="videoModal">
+      <span class="close" id="closeVideoModal">&times;</span>
+      <video id="modalVideo" controls autoplay></video>
+      <div class="modal-arrow" id="prevVideoBtn">&#10094;</div>
+      <div class="modal-arrow" id="nextVideoBtn">&#10095;</div>
+    </div>
+    <!-- End Programlar -->
+
+    <!-- Hakkımızda: Radio-Carousel Kolaj + Tüm Resimler Butonu -->
+    <section id="about">
+      <div class="title">
+        <h1 class="font-color">Kurumdan Fotoğraflar Kolajı</h1>
+        <div class="line"></div>
+      </div>
+      <br />
+      <div id="about_us">
+        <div class="boxx">
+          <div class="containerx">
+            <!-- Üç radio butonu (slayt) -->
+            <input type="radio" name="slider" id="item-1" checked />
+            <input type="radio" name="slider" id="item-2" />
+            <input type="radio" name="slider" id="item-3" />
+            <!-- cards -->
+            <div class="cards">
+              <!-- Her label içinde bir img; id ile JS'de güncellenecek -->
+              <label class="cardt" for="item-1" id="col-img-1">
+                <img id="img-1" src="./img/carousel-img4.jpg" alt="Kurum Görsel 1" />
+              </label>
+              <label class="cardt" for="item-2" id="col-img-2">
+                <img id="img-2" src="./img/carousel-img5.jpg" alt="Kurum Görsel 2" />
+              </label>
+              <label class="cardt" for="item-3" id="col-img-3">
+                <img id="img-3" src="./img/carousel-img5.jpg" alt="Kurum Görsel 3" />
+              </label>
+            </div>
+          </div>
+        <!-- Butonu resimlerin altına yerleştiriyoruz -->
+<div class="all-images-button">
+  <button id="showAllBtn" class="ctn">
+    <i class="fa fa-image" aria-hidden="true"></i> Tüm Resimler
+  </button>
+</div>
+
+        </div>
+      </div>
+    </section>
+    
+    <!-- End Hakkımızda -->
+
+    <!-- Modal: Tüm resimler için -->
+    <div id="galleryModal">
+      <span id="closeModal">&times;</span>
+      <img id="modalImg" />
+      <div class="modal-arrow" id="prevBtn">&#10094;</div>
+      <div class="modal-arrow" id="nextBtn">&#10095;</div>
+    </div>
+
+    <!-- Vizyon ve Misyon Bölümü -->
+    <section id="vision-mission">
+      <div class="container">
+        <div class="title">
+          <h1 class="font-color">Vizyonumuz &amp; Misyonumuz</h1>
+          <div class="line"></div>
+        </div>
+        <div class="vm-content" style="display: flex; flex-wrap: wrap; justify-content: space-around; padding: 2rem 0;">
+          <div class="vision" style="flex: 1; min-width: 280px; margin: 1rem;">
+            <h2>Vizyonumuz</h2>
+            <p>
+              Vizyonumuz, özel eğitim alanında daha ileride bir eğitim kurumu olmak ve hizmet alanımızda tanınan, güvenilir bir marka haline gelmektir. Öğrencilerimizin yüksek faydasını ve Velilerimizin memnuniyetini her zaman ön planda tutarak, eğitim standartlarımızı yükseltmeyi hedefliyoruz.
+            </p>
+          </div>
+          <div class="mission" style="flex: 1; min-width: 280px; margin: 1rem;">
+            <h2>Misyonumuz</h2>
+            <p>
+              Misyonumuz, öğrencilerimize en yüksek değeri sağlamak ve onların ihtiyaçlarını en etkili şekilde karşılamaktır. Bunu, sürekli kendimizi geliştirecek eğitimlerle, ailelere sunduğumuz eğitimler ve aile iletişimi ile her biri alanlarında uzman, deneyimli ekibimizle gerçekleştiriyoruz.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- End Vizyon & Misyon -->
+
+    <!-- Değerlerimiz Bölümü -->
+    <section id="values">
+      <div class="container">
+        <div class="title">
+          <h1 class="font-color">Değerlerimiz</h1>
+          <div class="line"></div>
+        </div>
+        <div class="values-content" style="text-align: center; padding: 2rem 0;">
+          <ul style="display: inline-block; text-align: left; font-size: var(--fs-paragraphs); line-height: 1.6;">
+            <li>Empati &amp; Saygı</li>
+            <li>Özveri &amp; Adalet</li>
+            <li>Yenilik &amp; Süreklilik</li>
+            <li>Güven &amp; Dürüstlük</li>
+            <li>Toplumsal Sorumluluk</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <!-- End Değerlerimiz -->
+
+    <!-- Ekibimiz Bölümü (Dinamik: RTDB'den çekilecek) -->
+    <section id="team">
+      <div class="container">
+        <div class="title">
+          <h1 class="font-color">Ekibimiz</h1>
+          <div class="line"></div>
+        </div>
+        <!-- Statik kartlar yerine "teamList" konteyneri -->
+        <div id="teamList" style="display: flex; flex-wrap: wrap; justify-content: space-around; padding: 2rem 0;">
+          <!-- Takım üye kartları JavaScript ile oluşturulacak -->
+        </div>
+      </div>
+    </section>
+    <!-- End Ekibimiz -->
+
+    <!-- Neden Biz Bölümü -->
+    <section id="why-us">
+      <div class="container">
+        <div class="title">
+          <h1 class="font-color">Neden Biz?</h1>
+          <div class="line"></div>
+        </div>
+        <div class="whyus-content" style="text-align: center; padding: 2rem 0;">
+          <p style="max-width: 60ch; margin: 0 auto; font-size: var(--fs-paragraphs); line-height: 1.6;">
+            - Deneyim: Bütün basamaklarda 17 yıllık özel eğitim deneyimi ile velilerimize güvenilir ve kaliteli çözümler sunarız.
+            <br />
+            - Kaliteli Hizmet: Öğrencilerimizin gelişmeleri öncelikli olmak üzere, velilerimizin memnuniyetini her zaman göz önünde tutarak, kaliteli hizmet anlayışıyla çalışırız.
+            <br />
+            - Yenilikçi Yaklaşım: Özel Eğitim ve Rehabilitasyon alanındaki modern gelişmeleri yakından takip ederek, öğrenci ve velilerimize en son yenilikleri sunarız.
+          </p>
+        </div>
+      </div>
+    </section>
+    <!-- End Neden Biz -->
+
+    <!-- İletişim Bölümü -->
+    <section id="contact">
+      <div class="title">
+        <h1 class="font-color">Bize Ulaşın</h1>
+        <div class="line"></div>
+      </div>
+      <div class="contact_us">
+        <form class="cform" action="" method="post">
+          <div class="crow-message">
+            <h1 class="color">Bize bir mesaj gönderin</h1>
+            <div></div>
+          </div>
+          <div class="crow-in">
+            <input type="text" id="name" name="name" placeholder="Adınız" />
+            <input type="tel" id="phone" name="phone" placeholder="Tel No" />
+          </div>
+          <div class="crow">
+            <div class="ccol-left">
+              <textarea id="remarks" name="remarks" placeholder="Mesajınız" style="height: 150px"></textarea>
+            </div>
+          </div>
+          <!-- Gönder butonu; type="button" ile form gönderimi JavaScript tarafından yapılır -->
+          <input class="crow-s" type="button" value="Gönder" id="sendBtn" />
+        </form>
+        <div class="cbox">
+          <div>
+            <p class="cbox-message">
+              Başka bir yol mu tercih ediyorsunuz?<br />Aşağıdaki bilgileri kullanarak bize ulaşın
+            </p>
+            <div class="cbox-line"></div>
+          </div>
+      
+          <div class="c_boxx">
+            <a href="tel:02125970653">
+              <i class="fa fa-phone"></i>
+              Sabit Telefon: 0 (212) 597 06 53
+            </a>
+          </div>
+          <div class="c_boxx">
+            <a href="tel:05305970132">
+              <i class="fa fa-phone"></i>
+              Müdür: 0 (530) 597 01 32
+            </a>
+          </div>
+          <div class="c_boxx">
+            <a href="tel:05335970231">
+              <i class="fa fa-phone"></i>
+              Halkla İlişkiler: 0 (533) 597 02 31
+            </a>
+          </div>
+          
+          <div class="c_boxx">
+            <a href="https://maps.app.goo.gl/FY74EteCmozvDhSk9?g_st=iw" target="_blank">
+              <i class="fa fa-map-marker"></i>
+              Konum: Görüntülemek için tıklayın
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- End İletişim -->
+
+    <!-- Yukarı Dön Butonu -->
+    <i class="arrow" onclick="topFunction()" id="upbtn"></i>
+    <!-- End Yukarı Dön -->
+
+    <!-- Footer -->
+    <section class="footer">
+      <div class="footer-content" style="text-align: center; padding: 1rem 0;">
+        <!-- Firma Adı ve Telif Hakkı -->
+        <span style="display: block; font-family: var(--ff-montserrat); font-size: 1rem;">
+          &copy; 2025 DETAY EĞİTİM VE REHABİLİTASYON MERKEZİ - Tüm hakları saklıdır.
+        </span>
+        <!-- Web Sitesi Geliştiricisi -->
+        <p style="font-family: var(--ff-roboto); font-size: 0.9rem; margin: 0.5rem 0;">
+          Web Sitesi Geliştiricisi: Emre Erkaya
+        </p>
+        <!-- Sosyal Medya Linkleri -->
+        <div class="social" style="margin-top: 1rem;">
+          <ul style="display: inline-flex; gap: 15px; padding: 0; margin: 0; list-style: none;">
+            <li>
+              <a href="https://www.instagram.com/detay_ozel_egitim?igsh=NDh3NmwzMjlwY2h0" target="_blank" rel="noreferrer" title="Instagram">
+                <i class="fa fa-instagram" style="font-size: 1.5rem; color: white;"></i>
+              </a>
+            </li>
+            <li>
+              <a href="https://www.facebook.com/share/1ZDed2ft42/?mibextid=wwXIfr" target="_blank" rel="noreferrer" title="Facebook">
+                <i class="fa fa-facebook" style="font-size: 1.5rem; color: white;"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    <!-- End Footer -->
+
+    <!-- Hamburger Menü (Mobile) -->
+    <script>
+      const menuBtn = document.querySelector(".menu-btn");
+      const navlinks = document.querySelector(".nav-links");
+      menuBtn.addEventListener("click", () => {
+        navlinks.classList.toggle("mobile-menu");
+      });
+    </script>
+    <!-- jQuery (varsa) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <!-- Ana script.js -->
+    <script src="js/script.js"></script>
+
+    <!-- Firebase Realtime DB'den Resim & Ekibi Yükleme Kodları -->
+    <script>
+ document.getElementById("sendBtn").addEventListener("click", function () {
+    const name = document.getElementById("name").value;
+    const phone = document.getElementById("phone").value;
+    const remarks = document.getElementById("remarks").value;
+    
+    const subject = encodeURIComponent("Yeni Mesaj: " + name);
+    const body = encodeURIComponent(
+      "Ad: " + name + "\n" +
+      "Telefon: " + phone + "\n\n" +
+      "Mesaj:\n" + remarks
+    );
+    
+    window.location.href = "mailto:tourism@adventure.com?subject=" + subject + "&body=" + body;
+  });
+      // 1) Firebase Config (Kendi projenize göre düzenleyin)
+      const firebaseConfig = {
+        apiKey: "AIzaSyA16M_6xOrUGEn9YCdzIFxBYXr-9ST7IWY",
+        authDomain: "qrmenuapplication-9b920.firebaseapp.com",
+        databaseURL: "https://qrmenuapplication-9b920-default-rtdb.firebaseio.com",
+        projectId: "qrmenuapplication-9b920",
+        storageBucket: "qrmenuapplication-9b920.appspot.com",
+        messagingSenderId: "1050979828232",
+        appId: "1:1050979828232:web:54d81e21056193bee147bd",
+        measurementId: "G-C3S611TREX"
+      };
+
+      // 2) Firebase'i başlat (Tek seferde)
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      // 3) Realtime DB referansı
+      const db = firebase.database();
+
+      // -- Kolaj (İlk 3 resim) --
+      db.ref("collageImages").limitToFirst(3).on("value", (snapshot) => {
+        const imageElems = [
+          document.getElementById("img-1"),
+          document.getElementById("img-2"),
+          document.getElementById("img-3")
+        ];
+        let i = 0;
+        snapshot.forEach((childSnap) => {
+          if (i < 3) {
+            const data = childSnap.val();
+            imageElems[i].src = data.imageUrl;
+          }
+          i++;
+        });
+      });
+
+      // -- Modal + Tüm Resimler --
+      const showAllBtn = document.getElementById("showAllBtn");
+      const galleryModal = document.getElementById("galleryModal");
+      const closeModalBtn = document.getElementById("closeModal");
+      const modalImg = document.getElementById("modalImg");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      let allImagesArray = [];  // Tüm resimleri tutar
+      let currentIndex = 0;     // Modal'da hangi resimde olduğumuzu tutar
+
+      showAllBtn.addEventListener("click", () => {
+        db.ref("collageImages").limitToFirst(999).once("value", (snapshot) => {
+          allImagesArray = [];
+          snapshot.forEach((childSnap) => {
+            const data = childSnap.val();
+            allImagesArray.push(data.imageUrl);
+          });
+
+          if (allImagesArray.length > 0) {
+            currentIndex = 0;
+            modalImg.src = allImagesArray[currentIndex];
+            galleryModal.style.display = "block";
+          } else {
+            alert("Veritabanında hiç resim yok!");
+          }
+        });
+      });
+
+      closeModalBtn.addEventListener("click", () => {
+        galleryModal.style.display = "none";
+      });
+
+      prevBtn.addEventListener("click", () => {
+        if (allImagesArray.length === 0) return;
+        currentIndex--;
+        if (currentIndex < 0) {
+          currentIndex = allImagesArray.length - 1;
+        }
+        modalImg.src = allImagesArray[currentIndex];
+      });
+
+      nextBtn.addEventListener("click", () => {
+        if (allImagesArray.length === 0) return;
+        currentIndex++;
+        if (currentIndex >= allImagesArray.length) {
+          currentIndex = 0;
+        }
+        modalImg.src = allImagesArray[currentIndex];
+      });
+
+      window.addEventListener("click", (e) => {
+        if (e.target === galleryModal) {
+          galleryModal.style.display = "none";
+        }
+      });
+
+      // -- EKİBİMİZ: Takım Üyelerini Yükleme --
+      const teamListDiv = document.getElementById("teamList");
+
+      db.ref("teamMembers").on("value", (snapshot) => {
+        teamListDiv.innerHTML = "";
+        snapshot.forEach((childSnap) => {
+          const data = childSnap.val(); // { name, role, photoUrl }
+          
+          const memberDiv = document.createElement("div");
+          memberDiv.classList.add("team-member");
+          memberDiv.style.flex = "1";
+          memberDiv.style.minWidth = "220px";
+          memberDiv.style.margin = "1rem";
+          memberDiv.style.textAlign = "center";
+
+          const img = document.createElement("img");
+          img.src = data.photoUrl;
+          img.alt = data.name;
+          img.style.width = "150px";
+          img.style.borderRadius = "50%";
+          img.style.marginBottom = "1rem";
+
+          const nameH2 = document.createElement("h2");
+          nameH2.textContent = data.name;
+
+          const roleP = document.createElement("p");
+          roleP.textContent = data.role;
+
+          memberDiv.appendChild(img);
+          memberDiv.appendChild(nameH2);
+          memberDiv.appendChild(roleP);
+
+          teamListDiv.appendChild(memberDiv);
+        });
+      });
+
+       // Yükleme: Program Videolarını "programVideos" düğümünden çekiyoruz
+       const videoGallery = document.getElementById("videoGallery");
+      let allVideoArray = [];
+      let currentVideoIndex = 0;
+      db.ref("programVideos").on("value", (snapshot) => {
+        videoGallery.innerHTML = "";
+        allVideoArray = [];
+        snapshot.forEach((childSnap) => {
+          const data = childSnap.val(); // { title, videoUrl, uploadedAt }
+          allVideoArray.push(data.videoUrl);
+
+          const videoCard = document.createElement("div");
+          videoCard.classList.add("video-card");
+
+          const videoEl = document.createElement("video");
+          videoEl.src = data.videoUrl;
+          videoEl.muted = true;
+          videoEl.loop = true;
+          videoEl.autoplay = true;
+          videoEl.playsInline = true;
+
+          const titleEl = document.createElement("h2");
+          titleEl.textContent = data.title;
+
+          videoCard.appendChild(videoEl);
+          videoCard.appendChild(titleEl);
+
+          videoCard.addEventListener("click", () => {
+            openVideoModal(data.videoUrl);
+          });
+
+          videoGallery.appendChild(videoCard);
+        });
+      });
+
+      // Video Modal Fonksiyonları
+      const videoModal = document.getElementById("videoModal");
+      const modalVideo = document.getElementById("modalVideo");
+      const closeVideoModal = document.getElementById("closeVideoModal");
+      const prevVideoBtn = document.getElementById("prevVideoBtn");
+      const nextVideoBtn = document.getElementById("nextVideoBtn");
+
+      function openVideoModal(videoUrl) {
+        currentVideoIndex = allVideoArray.indexOf(videoUrl);
+        if (currentVideoIndex === -1) {
+          currentVideoIndex = 0;
+        }
+        modalVideo.src = allVideoArray[currentVideoIndex];
+        videoModal.style.display = "block";
+      }
+
+      closeVideoModal.addEventListener("click", () => {
+        videoModal.style.display = "none";
+        modalVideo.pause();
+      });
+
+      prevVideoBtn.addEventListener("click", () => {
+        if (allVideoArray.length === 0) return;
+        currentVideoIndex = (currentVideoIndex - 1 + allVideoArray.length) % allVideoArray.length;
+        modalVideo.src = allVideoArray[currentVideoIndex];
+        modalVideo.play();
+      });
+
+      nextVideoBtn.addEventListener("click", () => {
+        if (allVideoArray.length === 0) return;
+        currentVideoIndex = (currentVideoIndex + 1) % allVideoArray.length;
+        modalVideo.src = allVideoArray[currentVideoIndex];
+        modalVideo.play();
+      });
+
+      window.addEventListener("click", (e) => {
+        if (e.target === videoModal) {
+          videoModal.style.display = "none";
+          modalVideo.pause();
+        }
+      });
+    </script>
+  </body>
+</html>
