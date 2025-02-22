@@ -948,7 +948,7 @@ input[type=radio] {
 /* 5) Neden Biz (#why-us) */
 #why-us {
   position: relative;
-  background: url("https://www.liderkurye.com.tr/wp-content/uploads/2017/05/neden-biz.jpg") center center / cover fixed no-repeat;
+  background-image: url("../img/nedenbiz.jpg");
   color: #fff;
   padding: 4rem 0;
 }
@@ -1392,7 +1392,7 @@ input[type=radio] {
 /* 5) Neden Biz (#why-us) */
 #why-us {
   position: relative;
-  background: url("https://www.liderkurye.com.tr/wp-content/uploads/2017/05/neden-biz.jpg") center center / cover fixed no-repeat;
+  background-image: url("../img/nedenbiz.jpg");
   color: #fff;
   padding: 4rem 0;
 }
