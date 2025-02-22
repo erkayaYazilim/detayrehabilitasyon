@@ -364,7 +364,7 @@ section {
 }
 
 #about_us {
-  background: url("/img/resimlerarkaplan.jpg");
+  background-image: url("../img/resimlerarkaplan.jpg");
   width: 100%;
   height: 630px;
   background-repeat: no-repeat;
